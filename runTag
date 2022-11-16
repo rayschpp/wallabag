@@ -1,0 +1,2 @@
+#! /bin/sh
+docker compose exec runtime php /var/www/wallabag/bin/console wallabag:tag:all $USER --env=prod

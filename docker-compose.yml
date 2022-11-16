@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  runtime:
+    image: wallabag/wallabag:2.5.2
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=wallaroot
+      - SYMFONY__ENV__DATABASE_DRIVER=pdo_mysql
+      - SYMFONY__ENV__DATABASE_HOST=database
+      - SYMFONY__ENV__DATABASE_PORT=3306
+      - SYMFONY__ENV__DATABASE_NAME=wallabag
+      - SYMFONY__ENV__DATABASE_USER=wallabag
+      - SYMFONY__ENV__DATABASE_PASSWORD=wallapass
+      - SYMFONY__ENV__DATABASE_CHARSET=utf8mb4
+      - SYMFONY__ENV__DOMAIN_NAME="https://wallabag.rayschpp.de"
+      - SYMFONY__ENV__SERVER_NAME="Links to read"
+      - SYMFONY__ENV__FOSUSER_REGISTRATION=false
+      - SYMFONY__ENV__FOSUSER_CONFIRMATION=false
+    ports:
+      - "80"
+    labels:
+      - "traefik.backend=wallabag"
+      - "traefik.basic.port=80"
+      - "traefik.enable=true"
+    networks:
+      - local
+      - web
+    volumes:
+      - images:/var/www/wallabag/web/assets/images
+    healthcheck:
+      test: ["CMD", "wget" ,"--no-verbose", "--tries=1", "--spider", "http://localhost"]
+      interval: 1m
+      timeout: 3s
+    depends_on:
+      - database
+      - redis
+ 
+  database:
+    restart: unless-stopped
+    image: mariadb:10.9.4
+    environment:
+      - MYSQL_ROOT_PASSWORD=wallaroot
+    volumes:
+      - ./data/database:/var/lib/mysql
+    networks:
+      - local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "-p${MARIADB_ROOT_PASSWORD}", "ping", "-h", "localhost"]
+      interval: 1m
+      timeout: 3s
+
+  redis:
+    restart: unless-stopped
+    image: redis:7.0.5-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1m
+      timeout: 3s
+
+volumes:
+  images:
+
+networks:
+  web: 
+    external: true
+  local:
+
