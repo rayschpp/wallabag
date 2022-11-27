@@ -16,12 +16,11 @@ services:
       - SYMFONY__ENV__SERVER_NAME="Links to read"
       - SYMFONY__ENV__FOSUSER_REGISTRATION=false
       - SYMFONY__ENV__FOSUSER_CONFIRMATION=false
-    ports:
-      - "80"
     labels:
       - "traefik.backend=wallabag"
       - "traefik.basic.port=80"
       - "traefik.enable=true"
+      - "traefik.http.routers.wallabag.entrypoints=websecure"
     networks:
       - local
       - web
